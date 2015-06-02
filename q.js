@@ -194,7 +194,15 @@ var nextTick =(function () {
         isNodeJS = true;
 
         requestTick = function () {
-            process.nextTick(flush);
+            // process.nextTick(flush);
+            // We had to replace this call to process.nextTick() with a call
+            // to setImmediate() instead. process.nextTick() was called
+            // recursively and eventually when the stack would attempt to
+            // unwind, node would print a bunch of messages about how the use
+            // of process.nextTick() is deprecated and to use setImmediate()
+            // instead. Then the process would die -- straight up die without
+            // leaving a trace (no core file, nothing in syslog, etc.).
+            setImmediate(flush);
         };
 
     } else if (typeof setImmediate === "function") {
